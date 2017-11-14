@@ -60,6 +60,16 @@ namespace Sustainsys.Saml2.AspNetCore2
                 };
                 await httpContext.SignInAsync(SignInScheme, commandResult.Principal, authProps);
             }
+
+            if (commandResult.TerminateLocalSession)
+            {
+                var authProps = new AuthenticationProperties(commandResult.RelayData)
+                {
+                    RedirectUri = commandResult.Location.OriginalString
+                };
+
+                await httpContext.SignOutAsync(SignInScheme, authProps);
+            }
         }
     }
 }
