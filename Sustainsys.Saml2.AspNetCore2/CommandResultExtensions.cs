@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Sustainsys.Saml2.AspNetCore2
 {
     static class CommandResultExtensions
     {
-        public static void Apply(
+        public async static Task Apply(
             this CommandResult commandResult,
             HttpContext httpContext,
             IDataProtector dataProtector,
@@ -57,7 +58,7 @@ namespace Sustainsys.Saml2.AspNetCore2
                 {
                     RedirectUri = commandResult.Location.OriginalString
                 };
-                httpContext.SignInAsync(SignInScheme, commandResult.Principal, authProps);
+                await httpContext.SignInAsync(SignInScheme, commandResult.Principal, authProps);
             }
         }
     }
