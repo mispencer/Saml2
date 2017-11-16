@@ -45,18 +45,11 @@ namespace Sustainsys.Saml2.AspNetCore2
                 httpContext.Response.Cookies.Delete(commandResult.ClearCookieName);
             }
 
-            if(!string.IsNullOrEmpty(commandResult.Content))
-            {
-                var buffer = Encoding.UTF8.GetBytes(commandResult.Content);
-                httpContext.Response.ContentType = commandResult.ContentType;
-                httpContext.Response.Body.Write(buffer, 0, buffer.Length);
-            }
-
             if(commandResult.Principal != null)
             {
                 var authProps = new AuthenticationProperties(commandResult.RelayData)
                 {
-                    RedirectUri = commandResult.Location.OriginalString
+                    RedirectUri = commandResult.Location?.OriginalString
                 };
                 await httpContext.SignInAsync(SignInScheme, commandResult.Principal, authProps);
             }
@@ -65,10 +58,17 @@ namespace Sustainsys.Saml2.AspNetCore2
             {
                 var authProps = new AuthenticationProperties(commandResult.RelayData)
                 {
-                    RedirectUri = commandResult.Location.OriginalString
+                    RedirectUri = commandResult.Location?.OriginalString
                 };
 
                 await httpContext.SignOutAsync(SignInScheme, authProps);
+            }
+
+            if(!string.IsNullOrEmpty(commandResult.Content))
+            {
+                var buffer = Encoding.UTF8.GetBytes(commandResult.Content);
+                httpContext.Response.ContentType = commandResult.ContentType;
+                httpContext.Response.Body.Write(buffer, 0, buffer.Length);
             }
         }
     }
