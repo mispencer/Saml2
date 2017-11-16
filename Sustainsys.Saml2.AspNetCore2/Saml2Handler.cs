@@ -104,6 +104,11 @@ namespace Sustainsys.Saml2.AspNetCore2
                 var commandName = context.Request.Path.Value.Substring(
                     options.SPOptions.ModulePath.Length).TrimStart('/');
 
+                // Exclude logout, since that is handled in the middleware
+                if (commandName == CommandFactory.LogoutCommandName) {
+                    return false;
+                }
+
                 var commandResult = CommandFactory.GetCommand(commandName).Run(
                     context.ToHttpRequestData(dataProtector.Unprotect), options);
 

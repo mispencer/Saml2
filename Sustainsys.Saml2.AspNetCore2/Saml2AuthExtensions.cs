@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Sustainsys.Saml2.AspNetCore2;
@@ -62,6 +63,22 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddTransient<Saml2Handler>();
 
             return builder;
+        }
+
+        /// <summary>
+        /// Register the Saml2 Logout middlewear. This is required because logout must happen AFTER the Authentication so we know which user to logout.
+        /// </summary>
+        /// <param name="app">Application Builder</param>
+        /// <returns>Application Builder</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Logout")]
+        public static IApplicationBuilder UseSaml2Logout(this IApplicationBuilder app)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            return app.UseMiddleware<Saml2LogoutMiddleware>();
         }
     }
 }
