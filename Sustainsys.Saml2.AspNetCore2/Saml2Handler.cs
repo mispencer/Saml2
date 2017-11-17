@@ -23,6 +23,7 @@ namespace Sustainsys.Saml2.AspNetCore2
         private readonly IDataProtector dataProtector;
         AuthenticationScheme scheme;
         private readonly IOptionsFactory<Saml2Options> optionsFactory;
+        private readonly ILogger<Saml2Handler> logger;
 
         /// <summary>
         /// Ctor
@@ -30,10 +31,12 @@ namespace Sustainsys.Saml2.AspNetCore2
         /// <param name="optionsCache">Options</param>
         /// <param name="dataProtectorProvider">Data Protector Provider</param>
         /// <param name="optionsFactory">Factory for options</param>
+        /// <param name="logger">Logger</param>
         public Saml2Handler(
             IOptionsMonitorCache<Saml2Options> optionsCache,
             IDataProtectionProvider dataProtectorProvider,
-            IOptionsFactory<Saml2Options> optionsFactory)
+            IOptionsFactory<Saml2Options> optionsFactory,
+            ILogger<Saml2Handler> logger)
         {
             if (dataProtectorProvider == null)
             {
@@ -44,6 +47,7 @@ namespace Sustainsys.Saml2.AspNetCore2
 
             this.optionsFactory = optionsFactory;
             this.optionsCache = optionsCache;
+            this.logger = logger;
         }
 
         /// <InheritDoc />
@@ -62,19 +66,20 @@ namespace Sustainsys.Saml2.AspNetCore2
         [ExcludeFromCodeCoverage]
         public Task<AuthenticateResult> AuthenticateAsync()
         {
-            throw new NotImplementedException();
+            return Task.FromResult(AuthenticateResult.NoResult());
         }
 
         /// <InheritDoc />
         public async Task ChallengeAsync(AuthenticationProperties properties)
         {
-            if (properties == null)
-            {
-                throw new ArgumentNullException(nameof(properties));
-            }
+            properties = properties ?? new AuthenticationProperties();
 
             // Don't serialize the return url twice, move it to our location.
             var redirectUri = properties.RedirectUri;
+            if (string.IsNullOrEmpty(redirectUri))
+            {
+                redirectUri = (context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? context.Request.PathBase) + context.Request.Path + context.Request.QueryString;
+            }
             properties.RedirectUri = null;
 
             var requestData = context.ToHttpRequestData(null);
@@ -87,13 +92,14 @@ namespace Sustainsys.Saml2.AspNetCore2
                 properties.Items);
 
             await result.Apply(context, dataProtector, scheme.Name);
+            logger.LogInformation($"AuthenticationScheme: {scheme.Name} was challenged.");
         }
 
         /// <InheritDoc />
         [ExcludeFromCodeCoverage]
         public Task ForbidAsync(AuthenticationProperties properties)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         /// <InheritDoc />
