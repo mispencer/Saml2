@@ -71,14 +71,14 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="app">Application Builder</param>
         /// <returns>Application Builder</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Logout")]
-        public static IApplicationBuilder UseSaml2Logout(this IApplicationBuilder app)
+        public static IApplicationBuilder UseSaml2(this IApplicationBuilder app)
         {
             if (app == null)
             {
                 throw new ArgumentNullException(nameof(app));
             }
 
-            return app.UseMiddleware<Saml2LogoutMiddleware>();
+            return app.UseMiddleware<Saml2Middleware>();
         }
     }
 }

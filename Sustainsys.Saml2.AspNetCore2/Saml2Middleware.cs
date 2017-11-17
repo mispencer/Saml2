@@ -18,7 +18,7 @@ namespace Sustainsys.Saml2.AspNetCore2
     /// so we need a middlewear which runs after authorization is complete.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Logout")]
-    public class Saml2LogoutMiddleware : IMiddleware
+    public class Saml2Middleware : IMiddleware
     {
         private readonly IOptionsMonitorCache<Saml2Options> optionsCache;
         private readonly IDataProtector dataProtector;
@@ -32,7 +32,7 @@ namespace Sustainsys.Saml2.AspNetCore2
         /// <param name="dataProtectorProvider">Data Protector Provider</param>
         /// <param name="optionsFactory">Factory for options</param>
         /// <param name="schemes">Authentication Scheme Provider</param>
-        public Saml2LogoutMiddleware(
+        public Saml2Middleware(
             IOptionsMonitorCache<Saml2Options> optionsCache,
             IDataProtectionProvider dataProtectorProvider,
             IOptionsFactory<Saml2Options> optionsFactory,
@@ -65,7 +65,8 @@ namespace Sustainsys.Saml2.AspNetCore2
 
                 var options = optionsCache.GetOrAdd(scheme.Name, () => optionsFactory.Create(scheme.Name));
 
-                if (options.SPOptions == null) {
+                if (options.SPOptions == null)
+                {
                     continue;
                 }
 
