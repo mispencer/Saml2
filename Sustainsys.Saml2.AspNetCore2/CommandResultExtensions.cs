@@ -36,7 +36,8 @@ namespace Sustainsys.Saml2.AspNetCore2
                         HttpOnly = true,
                         // We are expecting a different site to POST back to us,
                         // so the ASP.Net Core default of Lax is not appropriate in this case
-                        SameSite = SameSiteMode.None
+                        SameSite = SameSiteMode.None,
+                        Secure = httpContext.Request.IsHttps,
                     });
             }
 
