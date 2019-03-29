@@ -15,7 +15,7 @@ namespace Sustainsys.Saml2.AspNetCore2
     /// <summary>
     /// Authentication handler for Saml2
     /// </summary>
-    public class Saml2Handler : IAuthenticationRequestHandler
+    public class Saml2Handler : IAuthenticationRequestHandler, IAuthenticationSignOutHandler
     {
         private readonly IOptionsMonitorCache<Saml2Options> optionsCache;
         Saml2Options options;
@@ -123,6 +123,32 @@ namespace Sustainsys.Saml2.AspNetCore2
                 return true;
             }
             return false;
+        }
+
+        /// <InheritDoc />
+        public async Task SignOutAsync(AuthenticationProperties properties)
+        {
+            properties = properties ?? new AuthenticationProperties();
+
+            // Don't serialize the return url twice, move it to our location.
+            var redirectUri = properties.RedirectUri;
+            if (string.IsNullOrEmpty(redirectUri))
+            {
+                redirectUri = (context.Features.Get<IAuthenticationFeature>()?.OriginalPathBase ?? context.Request.PathBase) + context.Request.Path + context.Request.QueryString;
+            }
+            properties.RedirectUri = null;
+
+            var requestData = context.ToHttpRequestData(null);
+
+            var result = LogoutCommand.Run(
+                requestData,
+                redirectUri,
+                options);
+
+            result.TerminateLocalSession = false;
+
+            await result.Apply(context, dataProtector, scheme.Name);
+            logger.LogInformation($"AuthenticationScheme: {scheme.Name} started signout.");
         }
     }
 }
